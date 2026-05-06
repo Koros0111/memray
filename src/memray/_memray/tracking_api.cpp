@@ -2,6 +2,8 @@
 #include <Python.h>
 
 #include <cassert>
+#include <cerrno>
+#include <stdio.h>
 
 #ifdef __linux__
 #    include <link.h>
@@ -876,7 +878,7 @@ Tracker::Tracker(
 
     d_writer->setMainTidAndSkippedFrames(thread_id(), computeMainTidSkip());
     if (!d_writer->writeHeader(false)) {
-        throw IoError{"Failed to write output header"};
+        throw IoError{"Failed to write output header: " + std::string(strerror(errno))};
     }
 
     RecursionGuard guard;
@@ -944,7 +946,7 @@ Tracker::BackgroundThread::BackgroundThread(
 #ifdef __linux__
     d_procs_statm.open("/proc/self/status");
     if (!d_procs_statm) {
-        throw IoError{"Failed to open /proc/self/status"};
+        throw IoError{"Failed to open /proc/self/status: " + std::string(strerror(errno))};
     }
 #endif
 }
